@@ -1,0 +1,19 @@
+{
+  "name": "session-import",
+  "version": "2.0.0",
+  "description": "跨 Harness 会话检索、预览与原生导入到目标工作区。",
+  "skills": "./.kimi-plugin/skills/",
+  "commands": "./.kimi-plugin/commands/",
+  "mcpServers": {
+    "session-hub": {
+      "command": "node",
+      "args": ["./hosts/mcp.cjs"],
+      "cwd": "./",
+      "env": { "SESSION_IMPORT_HOST": "kimi-code" }
+    }
+  },
+  "interface": {
+    "displayName": "Session Hub",
+    "shortDescription": "跨 Harness 检索会话，原生导入到指定工作区并自动刷新侧边栏"
+  }
+}

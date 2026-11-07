@@ -1,0 +1,7 @@
+{
+  "name": "session-import",
+  "version": "2.0.0",
+  "description": "Discover, read, import and distill local harness sessions into the current conversation.",
+  "commands": ["./commands/session-import.md"],
+  "skills": ["./skills/session-import"]
+}

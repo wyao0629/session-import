@@ -1,0 +1,245 @@
+{
+  "activationEvents": ["onCommand:session-import.open", "onCommand:session-import.forge.open", "onCommand:session-import.forge.show", "onStartup"],
+  "author": "workspace",
+  "categories": [
+    "developer-tools",
+    "productivity",
+    "import"
+  ],
+  "changelog": "2.0.0：统一 Harness 解析；Codex zstd 与子代理；Kimi 三个根；Pi 叶子路径及工具配对；新增 Grok、Qoder、Reasonix、AutoClaw；异步索引；默认跳过重复导入。插件 ID pi.session-import，命令前缀 session-import.，视图前缀 session-import-，与旧插件 0.4.9 共存。",
+  "contributes": {
+    "commands": [
+      {
+        "id": "session-import.open",
+        "category": "Import",
+        "title": "会话导入：打开面板",
+        "keywords": [
+          "import",
+          "导入",
+          "会话",
+          "sync",
+          "同步",
+          "codex",
+          "claude",
+          "kimi"
+        ]
+      },
+      {
+        "id": "session-import.forge.open",
+        "category": "Import",
+        "title": "会话熔炉：蒸馏已导入会话",
+        "keywords": [
+          "forge",
+          "蒸馏",
+          "distill",
+          "规则",
+          "AGENTS.md",
+          "skill"
+        ]
+      },
+      {
+        "id": "session-import.forge.show",
+        "category": "Import",
+        "title": "会话熔炉：打开工作面板",
+        "keywords": [
+          "forge",
+          "蒸馏",
+          "panel"
+        ]
+      }
+    ],
+    "sessionSources": [
+      { "id": "session-import.codex", "label": { "en": "Codex", "zh-CN": "Codex" } },
+      { "id": "session-import.kimi-code", "label": { "en": "Kimi Code", "zh-CN": "Kimi Code" } },
+      { "id": "session-import.kimi-desktop", "label": { "en": "Kimi Desktop", "zh-CN": "Kimi 桌面版" } },
+      { "id": "session-import.kimi-legacy", "label": { "en": "Kimi (legacy)", "zh-CN": "Kimi（旧版）" } },
+      { "id": "session-import.pi", "label": { "en": "Pi", "zh-CN": "Pi" } },
+      { "id": "session-import.claude-code", "label": { "en": "Claude Code", "zh-CN": "Claude Code" } },
+      { "id": "session-import.qoder", "label": { "en": "Qoder", "zh-CN": "Qoder" } },
+      { "id": "session-import.workbuddy", "label": { "en": "WorkBuddy", "zh-CN": "WorkBuddy" } },
+      { "id": "session-import.zcode", "label": { "en": "ZCode", "zh-CN": "ZCode" } },
+      { "id": "session-import.opencode", "label": { "en": "OpenCode", "zh-CN": "OpenCode" } },
+      { "id": "session-import.openclaw", "label": { "en": "OpenClaw", "zh-CN": "OpenClaw" } },
+      { "id": "session-import.autoclaw", "label": { "en": "AutoClaw", "zh-CN": "AutoClaw" } },
+      { "id": "session-import.gemini", "label": { "en": "Gemini", "zh-CN": "Gemini" } },
+      { "id": "session-import.dsh", "label": { "en": "DSH", "zh-CN": "DSH" } },
+      { "id": "session-import.grok", "label": { "en": "Grok", "zh-CN": "Grok" } },
+      { "id": "session-import.reasonix", "label": { "en": "Reasonix", "zh-CN": "Reasonix" } },
+      { "id": "session-import.custom", "label": { "en": "Custom source", "zh-CN": "声明式来源" } }
+    ],
+    "settings": [
+      {
+        "key": "session-import.autoSyncEnabled",
+        "title": "启用自动同步",
+        "description": "按下方间隔在后台重新扫描所有 Harness 的会话并更新索引。",
+        "type": "boolean",
+        "default": true
+      },
+      {
+        "key": "session-import.syncIntervalValue",
+        "title": "自动同步间隔（数值）",
+        "description": "与下方单位组合，最短 30 秒，最长 365 天。",
+        "type": "number",
+        "default": 30
+      },
+      {
+        "key": "session-import.syncIntervalUnit",
+        "title": "自动同步间隔（单位）",
+        "type": "select",
+        "default": "minutes",
+        "enum": [
+          { "label": "秒", "value": "seconds" },
+          { "label": "分钟", "value": "minutes" },
+          { "label": "小时", "value": "hours" },
+          { "label": "天", "value": "days" }
+        ]
+      },
+      {
+        "key": "session-import.enabledHarnesses",
+        "title": "要索引的 Harness",
+        "description": "逗号分隔的 Harness ID；留空表示全部。",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "key": "session-import.extraSearchRoots",
+        "title": "额外搜索目录",
+        "description": "自动发现找不到时，在这里补充 Harness 数据所在的绝对路径。多个路径用换行或 | 分隔。",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "default": "AGENTS.md",
+        "description": "相对于工作区根目录。写入范围受插件声明的 fs.write 限制。",
+        "key": "session-import.forgeOutputPath",
+        "scope": "plugin",
+        "title": "蒸馏输出路径",
+        "type": "string"
+      },
+      {
+        "default": "high",
+        "enum": [
+          { "label": "off", "value": "off" },
+          { "label": "low", "value": "low" },
+          { "label": "medium", "value": "medium" },
+          { "label": "high (recommended)", "value": "high" }
+        ],
+        "key": "session-import.forgeThinkingLevel",
+        "scope": "plugin",
+        "title": "蒸馏推理强度",
+        "type": "select"
+      }
+    ],
+    "views": [
+      {
+        "entry": "views/importer.html",
+        "icon": "list-checks",
+        "id": "session-import-hub",
+        "order": 45,
+        "title": {
+          "en": "Session Import",
+          "zh-CN": "会话导入"
+        }
+      },
+      {
+        "entry": "views/forge.html",
+        "icon": "sparkles",
+        "id": "session-import-forge",
+        "order": 46,
+        "title": {
+          "en": "Session Forge",
+          "zh-CN": "会话熔炉"
+        }
+      }
+    ],
+    "agentTools": [
+      { "name": "session_hub_sync", "risk": "low",
+        "description": "重新扫描本地所有已注册 Harness 并更新插件索引；不修改来源会话。返回各来源计数与错误。",
+        "schema": { "type": "object", "properties": {}, "additionalProperties": false } },
+      { "name": "session_hub_search", "risk": "low",
+        "description": "按元数据检索本地会话（名称、ID、首句、工作区），不搜索正文。默认只列 GUI 可见会话，返回 parentSessionId、childCount、visible、hiddenReason；指定 parentSessionId 可查隐藏子会话。",
+        "schema": { "type": "object", "properties": {
+          "query": { "type": "string", "maxLength": 500 },
+          "harness": { "type": "string", "description": "注册表中的 Harness ID 或别名；也接受声明式来源 ID，留空为全部。" },
+          "workspace": { "type": "string", "maxLength": 300 },
+          "parentSessionId": { "type": "string", "maxLength": 256 },
+          "includeHidden": { "type": "boolean", "description": "默认 false。" },
+          "since": { "type": "string" }, "until": { "type": "string" }, "includeArchived": { "type": "boolean" },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 200 },
+          "offset": { "type": "integer", "minimum": 0 }
+        }, "additionalProperties": false } },
+      { "name": "session_hub_resolve", "risk": "low",
+        "description": "按 ID、前缀、会话链接或文件路径定位会话，包括隐藏子代理。ambiguous 表示需进一步指定 Harness 或完整 ID。",
+        "schema": { "type": "object", "properties": {
+          "ref": { "type": "string", "minLength": 1, "maxLength": 2000, "description": "会话 ID、ID 前缀、链接或文件路径。" },
+          "harness": { "type": "string", "description": "注册表中的 Harness ID 或别名；也接受声明式来源 ID，留空为全部。" }
+        }, "required": ["ref"], "additionalProperties": false } },
+      { "name": "session_hub_read", "risk": "low",
+        "description": "以 Markdown 分页读取会话（包括隐藏子代理）。思考默认保留，工具调用/结果作为文本；includeSubagents 展开子代理全文。分页时保持 withThinking、includeSubagents、toolDetail 不变，用 nextOffset 继续。",
+        "schema": { "type": "object", "properties": {
+          "ref": { "type": "string", "minLength": 1, "maxLength": 2000, "description": "会话 ID、ID 前缀、链接或文件路径。" },
+          "harness": { "type": "string", "description": "注册表中的 Harness ID 或别名；也接受声明式来源 ID，留空为全部。" },
+          "fromEnd": { "type": "boolean" }, "offset": { "type": "integer", "minimum": 0 },
+          "maxChars": { "type": "integer", "minimum": 1, "maximum": 200000 },
+          "toolDetail": { "type": "string", "enum": ["none", "brief", "full"] },
+          "withThinking": { "type": "boolean", "description": "默认 true。" },
+          "includeSubagents": { "type": "boolean", "description": "默认 false，只列子会话引用。" }
+        }, "required": ["ref"], "additionalProperties": false } }
+    ]
+  },
+  "description": "会话导入：自动发现并索引本机所有 Harness 的会话，支持定时自动同步；向 Agent 提供检索与读取会话的工具；支持会话预览与导入；保留会话熔炉（蒸馏）功能。",
+  "engines": {
+    "piDesktop": ">=0.14.3"
+  },
+  "fs": {
+    "read": {
+      "root": "workspace",
+      "scope": ["AGENTS.md", "*.md", "docs/**", ".agents/skills/**"]
+    },
+    "write": {
+      "root": "workspace",
+      "scope": ["AGENTS.md", "*.md", "docs/**", ".agents/skills/**"]
+    }
+  },
+  "i18n": {
+    "en": {
+      "name": "Session Import",
+      "description": "Auto-discovers and indexes sessions from every local harness with scheduled sync, gives the agent tools to find and read sessions, supports session preview and import, and keeps the original session forge.",
+      "safetyNotes": "Reads harness session files and SQLite databases read-only. Writes only its own index in the plugin data directory, plus sessions through the host import API. Agent tools are read-only. No network requests."
+    },
+    "zh-CN": {
+      "name": "会话导入",
+      "description": "自动发现并索引本机所有 Harness 的会话，支持定时自动同步；向 Agent 提供检索与读取会话的工具；支持会话预览与导入；保留会话熔炉（蒸馏）功能。",
+      "safetyNotes": "以只读方式读取各 Harness 的本地会话文件与 SQLite 库。仅在插件数据目录写入自己的索引，并经宿主导入接口写入会话。Agent 工具均为只读。不发起网络请求。"
+    }
+  },
+  "id": "pi.session-import",
+  "main": "main.js",
+  "name": "会话导入",
+  "permissions": [
+    "ui.panel",
+    "ui.view",
+    "desktop.control",
+    "session.read",
+    "session.read.own",
+    "session.import",
+    "project.create",
+    "agent.complete",
+    "models.list",
+    "fs.read",
+    "fs.write",
+    "agent.tool.register"
+  ],
+  "safetyNotes": "以只读方式读取各 Harness 的本地会话文件与 SQLite 库。仅在插件数据目录写入自己的索引，并经宿主导入接口写入会话。Agent 工具均为只读。不发起网络请求，无遥测。",
+  "schemaVersion": 1,
+  "ui": {
+    "height": 720,
+    "panel": "views/importer.html",
+    "title": {
+      "en": "Session Import",
+      "zh-CN": "会话导入"
+    },
+    "width": 1040
+  },
+  "version": "2.0.0"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "session-import",
+  "name": "Session Import",
+  "version": "2.0.0",
+  "description": "Read, import and distill local harness sessions into current context.",
+  "categories": ["developer-tools"],
+  "skills": ["./skills"],
+  "activation": { "onStartup": true },
+  "contracts": {
+    "tools": [
+      "session_hub_sync",
+      "session_hub_search",
+      "session_hub_resolve",
+      "session_hub_read",
+      "session_hub_import",
+      "session_hub_forge"
+    ]
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "host": { "type": "string", "enum": ["openclaw", "autoclaw"], "default": "openclaw" },
+      "workspace": { "type": "string", "description": "Optional workspace override; otherwise use the active tool workspace." },
+      "dataDir": { "type": "string", "description": "Optional plugin-owned index and import directory." },
+      "autoSync": { "type": "boolean", "default": true }
+    }
+  }
+}

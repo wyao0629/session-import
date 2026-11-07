@@ -1,0 +1,14 @@
+node_modules/
+.superpowers/
+docs/superpowers/
+dist/
+generated/
+hosts/configs/*/
+coverage/
+fixtures/
+*.log
+*.bak
+.env
+.env.*
+.DS_Store
+Thumbs.db

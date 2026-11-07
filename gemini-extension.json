@@ -1,0 +1,13 @@
+{
+  "name": "session-import",
+  "version": "2.0.0",
+  "description": "Continue local harness sessions using MCP tools and the session-import prompt command.",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "session-import": {
+      "command": "node",
+      "args": ["${extensionPath}/hosts/mcp.cjs"],
+      "env": { "SESSION_IMPORT_HOST": "gemini" }
+    }
+  }
+}

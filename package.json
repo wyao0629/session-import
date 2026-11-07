@@ -1,0 +1,22 @@
+{
+  "name": "session-import",
+  "version": "2.0.0",
+  "description": "Cross-harness session discovery, preview, transfer and continuation",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wyao0629/session-import.git"
+  },
+  "type": "commonjs",
+  "main": "main.js",
+  "bin": {
+    "session-import": "hosts/cli.cjs",
+    "session-import-mcp": "hosts/mcp.cjs",
+    "session-import-setup": "hosts/install.cjs"
+  },
+  "engines": { "node": ">=22.13.0" },
+  "pi": { "extensions": ["./hosts/pi/index.js"], "skills": ["./skills/session-import"] },
+  "openclaw": { "extensions": ["./hosts/openclaw/index.cjs"] },
+  "keywords": ["pi-package", "mcp", "session-import", "kimi", "codex", "claude"],
+  "files": ["main.js", "manifest.json", "kimi.plugin.json", ".kimi-plugin", ".claude-plugin", ".mcp.json", "gemini-extension.json", "GEMINI.md", "openclaw.plugin.json", "lib", "hosts", "skills", "commands", "views", "docs", "README.md", "LICENSE"]
+}
