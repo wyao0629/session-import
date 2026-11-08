@@ -5,6 +5,7 @@ const fsp = require('node:fs/promises');
 const path = require('node:path');
 const os = require('node:os');
 const { createHash, randomUUID } = require('node:crypto');
+const { findRuntimeBinding, runtimeBindingRecords, runtimeBindingStatus } = require('./kimi-runtime-binding.cjs');
 
 const TARGET = 'kimi-code';
 
@@ -95,8 +96,9 @@ function prepareMessages(messages, now) {
 
 // Display restoration uses context.*; engine restoration uses agent.*.
 // Engine message.appended contains an entry { message, meta? }, not a bare message.
-function* wireRecords(messages, createdAt) {
+function* wireRecords(messages, createdAt, binding, bindingTime = createdAt, workspace) {
   yield { type: 'metadata', protocol_version: '1.5', created_at: createdAt };
+  yield* runtimeBindingRecords(binding, bindingTime, workspace);
   let turnId = -1;
   let last;
   function* endTurn() {
@@ -310,8 +312,8 @@ async function appendIndex(root, record) {
 /**
  * Always creates a new native UUID session. mode/options never select an
  * overwrite, active journal or context-only import. No host credentials or
- * profile snapshots are copied. Like an unbound native session, the desktop's
- * next prompt must supply its selected profile/model (setModel binds a profile).
+ * provider secrets are copied. Existing local startup records provide the model,
+ * profile, environment and tools; the latest thinking effort overrides them.
  */
 async function importSession({ entry, messages, destination, title, mode, options } = {}) {
   object(destination, 'destination');
@@ -328,6 +330,7 @@ async function importSession({ entry, messages, destination, title, mode, option
   }
   if (!(await fsp.stat(workspace)).isDirectory()) throw new Error('workspace is not a directory');
   await fsp.mkdir(root, { recursive: true, mode: 0o700 });
+  const runtimeBinding = await findRuntimeBinding(root, workspace);
   const sessionId = randomUUID();
   const backupDir = path.join(root, '.session-import-backups', sessionId);
   let sessionPath;
@@ -358,7 +361,7 @@ async function importSession({ entry, messages, destination, title, mode, option
       phase = 'write native history';
       const wire = await fsp.open(path.join(agentHome, 'wire.jsonl'), 'wx', 0o600);
       try {
-        for (const record of wireRecords(prepared, createdAt)) {
+        for (const record of wireRecords(prepared, createdAt, runtimeBinding, now, workspace)) {
           assertOwned();
           await wire.writeFile(`${JSON.stringify(record)}\n`);
         }
@@ -398,6 +401,9 @@ async function importSession({ entry, messages, destination, title, mode, option
       phase = 'release projects lock';
       return { sessionId, sessionPath, target: TARGET, title: sessionTitle,
         messageCount: prepared.length, nativeHistory: true,
+        runtimeBinding: { status: runtimeBindingStatus(runtimeBinding), ...(runtimeBinding ? {
+          modelAlias: runtimeBinding.modelAlias, profileName: runtimeBinding.profileName,
+          thinkingEffort: runtimeBinding.thinkingEffort } : {}) },
         sidebar: { registered: true, workspace, projectId } };
     });
   } catch (cause) {

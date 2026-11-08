@@ -6,6 +6,7 @@ Entries below 1.0.0 are inherited from `io.github.muzimu217.session-import`.
 ## Unreleased
 
 - Kimi Code Windows 桌面端在原生导入成功后自动执行两阶段界面刷新：先触发索引处理，等待 `.index-dirty` 清理后再显示最新列表。MCP 与面板共用该行为；重复跳过不刷新，刷新失败不影响导入结果。
+- Kimi Code 原生导入补齐环境、Profile、模型、权限和工具启动记录，并应用最新模型与推理强度，修复导入后无法切换模型或继续运行的问题。同工作区完整会话优先，跨工作区清理来源提示词、AGENTS 路径和旧快照；拦截敏感字段。返回摘要区分 `bound` / `minimal` / `unavailable`，不包含启动记录正文。
 
 ## 2.0.0 — 2026-11-07
 

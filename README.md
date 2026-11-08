@@ -87,6 +87,10 @@ node hosts/cli.cjs open --host kimi-code --workspace "D:/workspace"
 
 导入会逐条写入目标客户端的原生历史，并返回 `sessionId`、`sessionPath`、侧边栏登记位置及成功、跳过或失败状态。导入的是历史内容，不恢复当时正在运行的工具状态，也不会自动执行旧任务。
 
+Kimi Code 原生导入会复用本机正常会话的启动记录，包括环境、Profile、模型、权限和工具初始化，并应用最新模型与推理强度。优先选择同一工作区的完整会话；跨工作区时会移除来源提示词、AGENTS 路径和旧快照，并改写目标 `cwd`。敏感字段会被拦截，不复制 Provider 密钥或其他账号凭据。
+
+返回的 `runtimeBinding` 只包含摘要。`bound` 表示同工作区完整绑定，`minimal` 表示仅有兜底配置，`unavailable` 表示未找到可用配置；后两种状态仍保留导入历史，但不保证模型切换可用。
+
 Windows 上的 Kimi Code 使用两阶段界面刷新：
 
 1. 第一次刷新触发宿主处理新会话索引。
